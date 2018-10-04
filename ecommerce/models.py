@@ -23,6 +23,12 @@ class Product(models.Model):
     quantity = models.IntegerField(default=0)
     category = models.ForeignKey(ProductCategory, on_delete=models.DO_NOTHING, blank=True, null=True)
 
+    @property
+    def featured_image(self):
+        image = self.image_set.filter(featured_image=True)
+        if image.count() == 1:
+            return image[0].image_path
+
     def __str__(self):
         return self.name
 

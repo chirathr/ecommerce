@@ -5,6 +5,15 @@
     Products
 
 - block body
-    - for product in product_list
-        %p {{ product.name }}
 
+    %div.row.m-5
+        - for product in product_list
+            %div.col-md-3
+                %img.card-img-top{'src': '/media/{{ product.featured_image }}', 'alt': ''}
+                %div.card-body
+                    %h5.card-title
+                        {{ product.name }}
+                    %p.card-text
+                        {{ product.description|truncatewords:20 }}
+                    %a.btn.btn-primary{'href': '#'}
+                        Add to Cart
