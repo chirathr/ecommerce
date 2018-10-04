@@ -1,0 +1,10 @@
+- extends 'base/base.haml'
+- load static
+
+- block title
+    Products
+
+- block body
+    - for product in product_list
+        %p {{ product.name }}
+

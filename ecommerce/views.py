@@ -1,9 +1,9 @@
 from django.shortcuts import render
 
-# Create your views here.
-from django.views.generic import TemplateView
-from hamlpy.views.generic import HamlExtensionTemplateView
+from hamlpy.views.generic import DetailView, ListView
+
+from ecommerce.models import Product
 
 
-class Home(HamlExtensionTemplateView, TemplateView):
-    template_name = 'base/base.haml'
+class ProductListView(ListView):
+    model = Product
