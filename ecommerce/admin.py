@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from ecommerce.models import Image, Product
+from ecommerce.models import Image, Product, ProductCategory
 
 
 class ProductAdmin(admin.ModelAdmin):
@@ -8,7 +8,7 @@ class ProductAdmin(admin.ModelAdmin):
         ('name', 'quantity'),
         'description',
         ('price', 'discount_percent'),
-        'rating'
+        'rating', 'category'
     )
 
     list_display = ('name', 'price', 'rating')
@@ -20,3 +20,4 @@ class ImageAdmin(admin.ModelAdmin):
 
 admin.site.register(Product, ProductAdmin)
 admin.site.register(Image, ImageAdmin)
+admin.site.register(ProductCategory)

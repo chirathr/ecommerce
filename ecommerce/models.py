@@ -1,6 +1,16 @@
 from django.db import models
 
 
+class ProductCategory(models.Model):
+    """
+    Specific category for each product
+    """
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
+
 class Product(models.Model):
     """
     Describes each product
@@ -11,6 +21,7 @@ class Product(models.Model):
     discount_percent = models.FloatField(default=0.0)
     rating = models.IntegerField(blank=True, null=True)
     quantity = models.IntegerField(default=0)
+    category = models.ForeignKey(ProductCategory, on_delete=models.DO_NOTHING, blank=True, null=True)
 
     def __str__(self):
         return self.name
