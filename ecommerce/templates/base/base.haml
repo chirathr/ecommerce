@@ -1,6 +1,24 @@
-#profile(style="width: 200px")
-    .left.column
-        #date 2010/02/18
-        #address Toronto, ON
-    .right.column<
-        #bio Jesse Miller
+{% load static %}
+
+%html{'lang': 'en'}
+    %head
+        %meta{'charset': 'utf-8'}
+        %meta{'name': 'viewport', 'content': 'width=device-width, initial-scale=1, shrink-to-ft=no'}
+
+        %link{'rel': 'stylesheet', 'href': '{% static "base/css/bootstrap.css" %}'}
+
+        - block css
+
+        %title
+            - block title
+                E-Commerce
+
+    %body
+
+        - block body
+
+        %script{'src': 'https://code.jquery.com/jquery-3.3.1.slim.min.js'}
+        %script{'src': 'https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js'}
+        %script{'src': '{% static "base/js/bootstrap.js" %}'}
+
+        - block js
