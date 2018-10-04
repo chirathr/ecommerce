@@ -1,0 +1,26 @@
+%header
+    %nav.navbar.navbar-expand-md.navbar-dark.bg-dark
+        %a.navbar-brand{'href': '{% url "home" %}' }
+            E-Commerce
+        %button.navbar-toggler{'type': 'button', 'data-toggle': 'collapse', 'data-target': '#navbarCollapse', 'aria-controls': 'navbarCollapse', 'aria-expanded': 'false', 'aria-label': 'Toggle navigation'}
+            %span.navbar-toggler-icon
+        %div.collapse.navbar-collapse#navbarCollapse
+            %ul.navbar-nav.mr-auto
+                %li.nav-item.active
+                    %a.nav-link{'href': '{% url "home" %}' }
+                        Home
+                %li.nav-item
+                    %a.nav-link{'href': '#' }
+                        Link
+            %ul.navbar-nav.ml-auto.float-left
+                - if user.is_authenticated
+                    %li.nav-item.active
+                        %a.nav-link{'href': '#'}
+                            Logout
+                - else
+                    %li.nav-item
+                        %a.nav-link{'href': '#'}
+                            Signup
+                    %li.nav-item.active
+                        %a.nav-link{'href': '#'}
+                            Login
