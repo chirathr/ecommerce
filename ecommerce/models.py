@@ -1,4 +1,5 @@
 from django.db import models
+from django.urls import reverse
 
 
 class ProductCategory(models.Model):
@@ -23,11 +24,15 @@ class Product(models.Model):
     quantity = models.IntegerField(default=0)
     category = models.ForeignKey(ProductCategory, on_delete=models.DO_NOTHING, blank=True, null=True)
 
+    def get_absolute_url(self):
+        return reverse('product-detail', args=[str(self.pk)])
+
     @property
     def featured_image(self):
         image = self.image_set.filter(featured_image=True)
-        if image.count() == 1:
+        if image.count() > 0:
             return image[0].image_path
+        return None
 
     def __str__(self):
         return self.name
