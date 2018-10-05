@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
+    'registration',
 
     # Third party
     'hamlpy',
@@ -47,7 +48,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google',
 
     # My apps
-    'registration',
+    # 'registration',
     'ecommerce',
 ]
 
