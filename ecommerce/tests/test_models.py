@@ -35,5 +35,14 @@ class TestProductModel(TestCase):
         self.assertIn(product.featured_image, expected_images)
 
 
+class TestImageModel(TestCase):
+    def setUp(self):
+        product = Product.objects.create(
+            name="Name", price=50.0, discount_percent=9.99, quantity=10)
+        Image.objects.create(
+            product=product, name="image 1", image_path="1.jpg", featured_image=True)
 
-
+    def test_object_name_is_product_name_space_image_name(self):
+        image = Image.objects.first()
+        expected_object_name = "{0} - {1}".format("Name", "image 1")
+        self.assertEqual(expected_object_name, str(image))
