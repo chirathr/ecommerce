@@ -27,3 +27,10 @@ Finally run the server using the `runserver` command.
 ```bash
 python manage.py runserver
 ```
+
+
+#### Testing
+
+```bash
+python manage.py test
+```

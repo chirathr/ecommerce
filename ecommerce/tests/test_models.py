@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from ecommerce.models import Product, Image
+from ecommerce.models import Product, Image, ProductCategory
 
 
 class TestProductModel(TestCase):
@@ -46,3 +46,13 @@ class TestImageModel(TestCase):
         image = Image.objects.first()
         expected_object_name = "{0} - {1}".format("Name", "image 1")
         self.assertEqual(expected_object_name, str(image))
+
+
+class TestProductCategoryModel(TestCase):
+    def setUp(self):
+        ProductCategory.objects.create(name="Category 1")
+
+    def test_object_name_is_category_name(self):
+        product_category = ProductCategory.objects.first()
+        self.assertEqual("Category 1", str(product_category))
+
