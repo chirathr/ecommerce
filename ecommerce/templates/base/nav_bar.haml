@@ -15,12 +15,12 @@
             %ul.navbar-nav.ml-auto.float-left
                 - if user.is_authenticated
                     %li.nav-item.active
-                        %a.nav-link{'href': '#'}
+                        %a.nav-link{'href': '{% url "account_logout" %}'}
                             Logout
                 - else
                     %li.nav-item
-                        %a.nav-link{'href': '#'}
+                        %a.nav-link{'href': '{% url "account_signup" %}'}
                             Signup
                     %li.nav-item.active
-                        %a.nav-link{'href': '#'}
+                        %a.nav-link{'href': '{% url "account_login" %}'}
                             Login
