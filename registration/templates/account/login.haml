@@ -1,0 +1,56 @@
+- extends 'base/base.haml'
+
+- load static
+- load i18n
+- load account socialaccount
+
+- block title
+    Sign In
+
+- block body
+
+    %div.container
+        %div.row.justify-content-md-center
+            %div.col-md-7.col-lg-5
+                %div.card.mt-5
+                    %div.card-body.justify-content-center
+                        %h3.card-title.text-center
+                            Sign In to E-Commerce
+
+                        - get_providers as socialaccount_providers
+                        - if socialaccount_providers
+                            %div.row.mt-4
+                                %a.btn.btn-primary.mx-auto{'href': '/accounts/google/login/?process=login'}
+                                    %h6.m-2
+                                        %i.fa.fa-google
+                                        %span.pb-2.m-3
+                                            Login with Google
+
+                        %hr
+                        %p.text-center
+                            or
+                        %p.text-center
+                            Login with email and password
+
+                        %form.m-4{'method': 'POST', 'action': '{% url "account_login" %}'}
+                            - csrf_token
+                            %div.form-group
+                                %input.form-control.p-2.mt-5#username{'type': 'text', 'placeholder': 'Enter Username', 'name': 'login'}
+                            %div.form-group
+                                %input.form-control.p-2.mt-4#username{'type': 'password', 'placeholder': 'Enter password', 'name': 'password'}
+                            %div.form-check
+                                %input.form-check-input#remember-me{'type': 'checkbox', 'name': 'remember'}
+                                %label.form-check-label{'for': 'remember-me'}
+                                    Remember me
+
+                            %div.row.justify-content-center.m-0
+                                %button.btn.btn-primary.btn-lg.btn-block.mt-4{'type': 'submit'}
+                                    Login
+
+                            %div.mt-4
+                                %div.float-left
+                                    %a.text-secondary{'href': '{% url "account_signup" %}'}
+                                        Create an account
+                                %div.float-right
+                                    %a.text-secondary{'href': '{% url "account_reset_password" %}' }
+                                        Forgot password
