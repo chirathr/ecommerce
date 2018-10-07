@@ -6,9 +6,9 @@
 
 - block body
 
-    %div.row.m-5
+    %div.row.mt-5.m-md-5
         - for product in product_list
-            %div.col-md-3
+            %div.col-lg-3.col-md-4.col-6
                 %img.card-img-top{'src': '/media/{{ product.featured_image }}', 'alt': ''}
                 %div.card-body
                     %h5.card-title
@@ -26,5 +26,8 @@
                             %i.fa.fa-star
                         - for i in product.stars_empty
                             %i.fa.fa-star-o
-                    %a.btn.btn-primary.mt-2{'href': '#'}
-                        Add to Cart
+                    %form{'method': 'post', 'action': '{% url "add_to_cart" %}' }
+                        - csrf_token
+                        %input{'type': 'hidden', 'name': 'product', 'value': '{{ product.pk }}' }
+                        %button.btn.btn-primary.mt-2{'type': 'submit'}
+                            Add to Cart
