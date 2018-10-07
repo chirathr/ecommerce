@@ -14,6 +14,17 @@
                     %h5.card-title
                         {{ product.name }}
                     %p.card-text
-                        {{ product.description|truncatewords:20 }}
-                    %a.btn.btn-primary{'href': '#'}
+                        {{ product.description|truncatechars:60|safe }}
+                    %h6.card-text.text-success
+                        &#8377; {{ product.discount_price }}
+                        %small.text-danger
+                            &#8377;
+                            %strike {{ product.price }}
+                        %small.text-muted - {{ product.discount_percent }}% off
+                    %p.card-text
+                        - for i in product.stars
+                            %i.fa.fa-star
+                        - for i in product.stars_empty
+                            %i.fa.fa-star-o
+                    %a.btn.btn-primary.mt-2{'href': '#'}
                         Add to Cart
