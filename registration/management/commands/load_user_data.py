@@ -1,3 +1,5 @@
+import random
+
 import requests
 import json
 
@@ -26,6 +28,7 @@ class Command(BaseCommand):
                 email="{0}@gmail.com".format(username),
                 password="qwerty@123",
                 first_name=first_name,
-                last_name=last_name
-
+                last_name=last_name,
+                wallet_balance=random.randint(100, 10000)
             )
+        print("Added 20 random users")
