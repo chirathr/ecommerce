@@ -1,0 +1,24 @@
+- extends 'base/base.haml'
+
+- load static
+- load i18n
+- load account socialaccount
+
+- block title
+    Sign Out
+
+- block body
+    %h1.text-center.m-5
+        Sign Out
+
+    %p.text-center.mt-5.pt-5
+        Are you sure you want to sign out?
+
+    %form.row.justify-content-center.mt-4{'method': 'post', 'action': '{% url "account_logout" %}'}
+        - csrf_token
+        %input{'type': 'hidden', 'name': '{{ redirect_field_valueq }}', 'value': '{{ redirect_field_value }}'}
+        %button.btn.btn-lg.btn-danger{'type': 'submit'}
+            Sign Out
+
+
+
