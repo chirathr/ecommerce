@@ -28,6 +28,19 @@ class Product(models.Model):
         return reverse('product-detail', args=[str(self.pk)])
 
     @property
+    def discount_price(self):
+        return self.price - int((self.price * (self.discount_percent / 100)))
+
+    @property
+    def stars(self):
+        print(self.rating, 5-self.rating)
+        return range(self.rating)
+
+    @property
+    def stars_empty(self):
+        return range(5 - self.rating)
+
+    @property
     def featured_image(self):
         image = self.image_set.filter(featured_image=True)
         if image.count() > 0:
