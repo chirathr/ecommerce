@@ -1,0 +1,34 @@
+- extends 'base/base.haml'
+
+- block title
+    {{ request.user }}'s cart
+
+- block body
+    %div.container
+        %div.row.mt-5
+            %h1.col-12
+                Shopping cart
+
+            %div.col-12.row.mt-4
+                - for item in cart_list
+                    %div.col-6.row
+                        %div.col-12
+                            %hr
+                        %div.col-3
+                            %img{'src': '/media/{{ item.product.featured_image }}', 'alt': '', 'height': '100em'}
+                        %div.col-9
+                            %h6.float-right.mt-3
+                                 &#8377; {{ item.product.discount_price }}
+                            %h6.mt-3
+                                {{ item.product.name }}
+                            %p
+                                %small.text-muted
+                                    Quantity: {{ item.quantity }}
+
+                            %a.text-danger.float-right{'href': ''}
+                                Delete
+                        %div.col-12
+                            %hr
+            %div.col-12
+                %a.btn.btn-lg.btn-outline-success.mt-4
+                    Proceed to checkout
