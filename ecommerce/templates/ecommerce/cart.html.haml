@@ -30,6 +30,11 @@
                                 %small.text-muted
                                     Quantity: {{ item.quantity }}
 
+                            - if item.quantity > item.product.quantity
+                                %small.text-danger.float-left
+                                    Sorry, only {{ item.product.quantity }} item left
+
+
                             %form{'method': 'post', 'action': '{% url "delete_from_cart" %}' }
                                 - csrf_token
                                 %input{'type': 'hidden', 'name': 'product', 'value': '{{ item.product.pk }}' }
