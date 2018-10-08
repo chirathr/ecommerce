@@ -31,6 +31,21 @@ python manage.py runserver
 
 #### Testing
 
+Linter test using Flake8
+
+```bash
+flake8 .
+```
+
+Coverage test
+
+```bash
+coverage run --source='.' manage.py test -v 2
+coverage report
+```
+
+Unit tests
+
 ```bash
 python manage.py test
 ```
