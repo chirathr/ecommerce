@@ -76,3 +76,24 @@ class Cart(models.Model):
 
     def __str__(self):
         return "{0} - {1}".format(self.user.username, self.product.name)
+
+
+class Order(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    date = models.DateTimeField(auto_now=False, auto_now_add=True)
+
+    @property
+    def order_list(self):
+        return self.order_list_set.all()
+
+    def __str__(self):
+        return "{0} - {0}".format(self.user.username, self.date)
+
+
+class OrderList(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.DO_NOTHING)
+    product = models.ForeignKey(Product, on_delete=models.DO_NOTHING)
+    quantity = models.IntegerField(default=1)
+
+    def __str__(self):
+        return "{0}, {1)".format(self.order, self.product)

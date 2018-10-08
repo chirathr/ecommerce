@@ -9,10 +9,11 @@
                 %li.nav-item.active
                     %a.nav-link{'href': '{% url "home" %}' }
                         Home
-                %li.nav-item
-                    %a.nav-link{'href': '#' }
-                        Link
+
             %ul.navbar-nav.ml-auto.float-left
+                %li.nav-item
+                    %a.nav-link{'href': '{% url "cart" %}'}
+                        Cart
                 - if user.is_authenticated
                     %li.nav-item.active
                         %a.nav-link{'href': '{% url "account_logout" %}'}
