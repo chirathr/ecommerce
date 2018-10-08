@@ -48,6 +48,10 @@ class Product(models.Model):
             return image[0].image_path
         return None
 
+    def reduce_quantity(self, order_quantity):
+        self.quantity -= order_quantity
+        self.save()
+
     def __str__(self):
         return self.name
 

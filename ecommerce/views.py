@@ -1,7 +1,8 @@
-from django.http import Http404
+from django.http import Http404, HttpResponseServerError
 from django.shortcuts import redirect, render
 from django.views.generic import TemplateView, DetailView, ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db import transaction, IntegrityError
 
 from ecommerce.models import Product, Cart, Order, OrderList, ProductCategory
 
@@ -143,15 +144,12 @@ class CheckoutPageView(LoginRequiredMixin, TemplateView):
 
         return render(request, self.template_name, context)
 
-    def reduce_user_balance(self, order_price):
-        self.request.user.wallet_balance -= order_price
-        self.request.user.save()
-
     def place_order_from_cart(self, cart_list, total_amount):
         order = Order.objects.create(user=self.request.user, amount=total_amount)
 
         # Add items in cart to order_list
         for cart_item in cart_list:
+            cart_item.product.reduce_quantity(cart_item.quantity)
             OrderList.objects.create(order=order, product=cart_item.product, quantity=cart_item.quantity)
             cart_item.delete()
 
@@ -169,8 +167,13 @@ class CheckoutPageView(LoginRequiredMixin, TemplateView):
         if self.request.user.wallet_balance < total_amount:
             return redirect('checkout')
 
-        self.reduce_user_balance(total_amount)
-        order = self.place_order_from_cart(cart_list, total_amount)
+        # Atomic transaction for placing order
+        try:
+            with transaction.atomic():
+                self.request.user.reduce_user_wallet_balance(total_amount)
+                order = self.place_order_from_cart(cart_list, total_amount)
+        except IntegrityError:
+            return HttpResponseServerError()
 
         template_name = "ecommerce/order_successful.html.haml"
         context = {'order': order}
