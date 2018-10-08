@@ -23,12 +23,16 @@ class UserCartListView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(UserCartListView, self).get_context_data(**kwargs)
         context['cart_list'] = Cart.objects.filter(user=self.request.user)
+
+        total = 0
+        for cart_item in context['cart_list']:
+            total += cart_item.product.discount_price * cart_item.quantity
+        context['total'] = total
         return context
 
 
 class UserCartAddView(LoginRequiredMixin, TemplateView):
     success_url = 'cart'
-    model = Cart
 
     def get(self, request, *args):
         return redirect('home')
@@ -46,6 +50,31 @@ class UserCartAddView(LoginRequiredMixin, TemplateView):
             except ValueError:
                 raise Http404
             except Product.DoesNotExist:
+                raise Http404
+        else:
+            raise Http404
+
+        return redirect(self.success_url)
+
+
+class UserCartDeleteView(LoginRequiredMixin, TemplateView):
+    success_url = 'cart'
+
+    def get(self, request, *args):
+        return redirect('home')
+
+    def post(self, request, *args):
+        if 'product' in request.POST:
+            try:
+                product = Product.objects.get(pk=int(request.POST['product']))
+                cart_item = Cart.objects.get(product=product, user=request.user)
+                cart_item.delete()
+
+            except ValueError:
+                raise Http404
+            except Product.DoesNotExist:
+                raise Http404
+            except Cart.DoesNotExist:
                 raise Http404
         else:
             raise Http404

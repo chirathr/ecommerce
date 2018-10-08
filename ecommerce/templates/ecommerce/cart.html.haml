@@ -10,6 +10,11 @@
                 Shopping cart
 
             %div.col-12.row.mt-4
+                -if not cart_list
+                    %h6.col-12
+                        No item in cart!
+                        %a{'href': '{% url "home" %}' }
+                            Get back to shopping?
                 - for item in cart_list
                     %div.col-6.row
                         %div.col-12
@@ -25,10 +30,19 @@
                                 %small.text-muted
                                     Quantity: {{ item.quantity }}
 
-                            %a.text-danger.float-right{'href': ''}
-                                Delete
+                            %form{'method': 'post', 'action': '{% url "delete_from_cart" %}' }
+                                - csrf_token
+                                %input{'type': 'hidden', 'name': 'product', 'value': '{{ item.product.pk }}' }
+                                %button.btn.btn-danger.btn-sm.float-right{'type': 'submit'}
+                                    Delete
                         %div.col-12
                             %hr
-            %div.col-12
-                %a.btn.btn-lg.btn-outline-success.mt-4
-                    Proceed to checkout
+            - if cart_list
+                %div.col-12
+                    %h5
+                        %span.text-muted
+                            Total:
+                        &#8377; {{ total }}
+                %div.col-12
+                    %a.btn.btn-lg.btn-outline-success.mt-4
+                        Proceed to checkout
