@@ -1,0 +1,50 @@
+- extends 'base/base.haml'
+
+- block title
+    Checkout
+
+- block body
+    %div.container.mt-5
+        %div.row
+            %div.col-12.mt-3
+                %h1
+                    Checkout
+
+            - for item in cart_list
+                %div.col-6.row
+                    %div.col-12
+                        %hr
+                    %div.col-3
+                        %img{'src': '/media/{{ item.product.featured_image }}', 'alt': '', 'height': '100em'}
+                    %div.col-9
+                        %h6.float-right.mt-3
+                             &#8377; {{ item.product.discount_price }}
+                        %h6.mt-3
+                            {{ item.product.name }}
+                        %p
+                            %small.text-muted
+                                Quantity: {{ item.quantity }}
+
+                        - if item.quantity > item.product.quantity
+                            %small.text-danger.float-left
+                                Sorry, your order will contain only {{ item.product.quantity }} item.
+
+
+                    %div.col-12
+                        %hr
+
+            %div.col-12.mt-3
+                %div.col-12
+                    %h5
+                        %span.text-muted
+                            Total:
+                        &#8377; {{ total_price }}
+
+                - if wallet_balance < total_price
+                    %div.col-12
+                        %h6.text-danger
+                            Cannot checkout! Your wallet balance is low: &#8377; {{ wallet_balance }}.
+                %div.col-12
+                    - if wallet_balance >= total_price
+                        %a.btn.btn-lg.btn-outline-success.mt-4
+                            Complete order

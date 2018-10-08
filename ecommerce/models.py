@@ -79,6 +79,9 @@ class Cart(models.Model):
 
 
 class Order(models.Model):
+    """
+    Used to store the order when user checkouts
+    """
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     date = models.DateTimeField(auto_now=False, auto_now_add=True)
 
@@ -91,6 +94,9 @@ class Order(models.Model):
 
 
 class OrderList(models.Model):
+    """
+    Item in an order
+    """
     order = models.ForeignKey(Order, on_delete=models.DO_NOTHING)
     product = models.ForeignKey(Product, on_delete=models.DO_NOTHING)
     quantity = models.IntegerField(default=1)

@@ -1,10 +1,9 @@
 from django.http import Http404
-from django.shortcuts import redirect
-from django.views.generic import TemplateView
+from django.shortcuts import redirect, render
+from django.views.generic import TemplateView, DetailView, ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from hamlpy.views.generic import DetailView, ListView
 
-from ecommerce.models import Product, Cart
+from ecommerce.models import Product, Cart, Order
 
 
 class ProductListView(ListView):
@@ -16,6 +15,14 @@ class ProductDetailView(DetailView):
     model = Product
 
 
+def get_total_price_of_cart(cart_list):
+    total = 0
+    for cart_item in cart_list:
+        total += cart_item.product.discount_price * cart_item.quantity
+
+    return total
+
+
 class UserCartListView(LoginRequiredMixin, TemplateView):
     template_name = 'ecommerce/cart.html.haml'
     model = Cart
@@ -23,15 +30,11 @@ class UserCartListView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(UserCartListView, self).get_context_data(**kwargs)
         context['cart_list'] = Cart.objects.filter(user=self.request.user)
-
-        total = 0
-        for cart_item in context['cart_list']:
-            total += cart_item.product.discount_price * cart_item.quantity
-        context['total'] = total
+        context['total'] = get_total_price_of_cart(cart_list=context["cart_list"])
         return context
 
 
-class UserCartAddView(LoginRequiredMixin, TemplateView):
+class CartAddView(LoginRequiredMixin, TemplateView):
     success_url = 'cart'
     cannot_add_to_cart_url = 'cannot_add_to_cart'
 
@@ -70,7 +73,7 @@ class UserCartAddView(LoginRequiredMixin, TemplateView):
         return redirect(self.success_url)
 
 
-class UserCartDeleteView(LoginRequiredMixin, TemplateView):
+class CartDeleteView(LoginRequiredMixin, TemplateView):
     success_url = 'cart'
 
     def get(self, request, *args):
@@ -94,3 +97,34 @@ class UserCartDeleteView(LoginRequiredMixin, TemplateView):
             raise Http404("Something went wrong!")
 
         return redirect(self.success_url)
+
+
+class OrderListView(ListView):
+    model = Order
+
+    def get_queryset(self):
+        return self.model.objects.filter(user=self.request.user)
+
+
+class OrderDetailView(DetailView):
+    model = Order
+
+
+class CheckoutPageView(LoginRequiredMixin, TemplateView):
+    template_name = 'ecommerce/checkout.html.haml'
+
+    def get(self, request, *args, **kwargs):
+        cart_list = Cart.objects.filter(user=request.user)
+
+        # If cart is empty
+        if cart_list.count() == 0:
+            # Shows cart is empty
+            return redirect('cart')
+
+        context = self.get_context_data()
+
+        context['wallet_balance'] = request.user.wallet_balance
+        context['cart_list'] = Cart.objects.filter(user=self.request.user)
+        context['total_price'] = get_total_price_of_cart(cart_list=context["cart_list"])
+
+        return render(request, self.template_name, context)
