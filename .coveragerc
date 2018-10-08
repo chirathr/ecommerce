@@ -1,0 +1,5 @@
+[run]
+omit =
+    website/*
+    */migrations/*
+    */apps.py
