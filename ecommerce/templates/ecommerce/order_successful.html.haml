@@ -1,0 +1,16 @@
+- extends 'base/base.haml'
+
+- block title
+    Order Successful
+
+- block body
+    %div.container
+        %div.row
+            %div.col-12
+                %h1.text-primary.mt-5
+                    Order successfully placed :)
+                %h6.mt-3
+                    Order id: {{ order.pk }}
+
+                %a.btn.btn-outline-primary{'href': ''}
+                    Review order

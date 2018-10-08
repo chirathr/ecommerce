@@ -97,9 +97,9 @@ class OrderList(models.Model):
     """
     Item in an order
     """
-    order = models.ForeignKey(Order, on_delete=models.DO_NOTHING)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.DO_NOTHING)
     quantity = models.IntegerField(default=1)
 
     def __str__(self):
-        return "{0}, {1)".format(self.order, self.product)
+        return "{0}, {1}".format(self.order, self.product)

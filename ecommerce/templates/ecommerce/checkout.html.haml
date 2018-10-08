@@ -46,5 +46,7 @@
                             Cannot checkout! Your wallet balance is low: &#8377; {{ wallet_balance }}.
                 %div.col-12
                     - if wallet_balance >= total_price
-                        %a.btn.btn-lg.btn-outline-success.mt-4
-                            Complete order
+                        %form{'method': 'post', 'action': '{% url "checkout" %}'}
+                            - csrf_token
+                            %button.btn.btn-lg.btn-outline-success.mt-4{'type': 'submit'}
+                                Place order

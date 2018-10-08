@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from ecommerce.models import Image, Product, ProductCategory, Cart
+from ecommerce.models import Image, Product, ProductCategory, Cart, Order, OrderList
 
 
 class ProductAdmin(admin.ModelAdmin):
@@ -22,3 +22,6 @@ admin.site.register(Product, ProductAdmin)
 admin.site.register(Image, ImageAdmin)
 admin.site.register(ProductCategory)
 admin.site.register(Cart)
+admin.site.register(Order)
+admin.site.register(OrderList)
+

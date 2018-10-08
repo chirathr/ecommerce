@@ -3,7 +3,7 @@ from django.shortcuts import redirect, render
 from django.views.generic import TemplateView, DetailView, ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
 
-from ecommerce.models import Product, Cart, Order
+from ecommerce.models import Product, Cart, Order, OrderList
 
 
 class ProductListView(ListView):
@@ -113,18 +113,53 @@ class OrderDetailView(DetailView):
 class CheckoutPageView(LoginRequiredMixin, TemplateView):
     template_name = 'ecommerce/checkout.html.haml'
 
-    def get(self, request, *args, **kwargs):
-        cart_list = Cart.objects.filter(user=request.user)
+    def get_cart_list(self):
+        return Cart.objects.filter(user=self.request.user)
 
-        # If cart is empty
+    def get(self, request, *args, **kwargs):
+
+        cart_list = self.get_cart_list()
         if cart_list.count() == 0:
             # Shows cart is empty
             return redirect('cart')
 
         context = self.get_context_data()
-
         context['wallet_balance'] = request.user.wallet_balance
-        context['cart_list'] = Cart.objects.filter(user=self.request.user)
-        context['total_price'] = get_total_price_of_cart(cart_list=context["cart_list"])
+        context['cart_list'] = cart_list
+        context['total_price'] = get_total_price_of_cart(cart_list)
 
         return render(request, self.template_name, context)
+
+    def reduce_user_balance(self, order_price):
+        self.request.user.wallet_balance -= order_price
+        self.request.user.save()
+
+    def place_order_from_cart(self, cart_list):
+        order = Order.objects.create(user=self.request.user)
+
+        # Add items in cart to order_list
+        for cart_item in cart_list:
+            OrderList.objects.create(order=order, product=cart_item.product, quantity=cart_item.quantity)
+            cart_item.delete()
+
+        return order
+
+    def post(self, request, *args, **kwargs):
+        cart_list = self.get_cart_list()
+        if cart_list.count() == 0:
+            # Shows cart is empty
+            return redirect('cart')
+
+        total_price = get_total_price_of_cart(cart_list)
+
+        # Check if wallet balance is there to place the order
+        if self.request.user.wallet_balance < total_price:
+            return redirect('checkout')
+
+        self.reduce_user_balance(total_price)
+        order = self.place_order_from_cart(cart_list)
+
+        template_name = "ecommerce/order_successful.html.haml"
+        context = {'order': order}
+
+        return render(request, template_name, context)
