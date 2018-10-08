@@ -1,0 +1,32 @@
+- extends 'base/base.haml'
+
+- block title
+    Orders
+
+- block body
+    %div.container.mt-5
+        %div.row
+            %div.col-12
+                %h1.float-left
+                    Orders {{ order.id }}
+                %h3.float-right
+                    &#8377; {{ order.amount }}
+            %div.col-12.mt-3
+                %p.text-muted
+                    {{ order.date }}
+            %div.col-12.row
+                - for item in order.order_list
+                    %div.col-6.row
+                        %div.col-12
+                            %hr
+                        %div.col-3
+                            %img{'src': '/media/{{ item.product.featured_image }}', 'alt': '', 'height': '100em'}
+                        %div.col-9
+                            %h6.float-right.mt-3
+                                 &#8377; {{ item.product.discount_price }}
+                            %h6.mt-3
+                                {{ item.product.name }}
+                            %p
+                                %small.text-muted
+                                    Quantity: {{ item.quantity }}
+

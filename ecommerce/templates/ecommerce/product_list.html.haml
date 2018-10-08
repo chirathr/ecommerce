@@ -26,8 +26,13 @@
                             %i.fa.fa-star
                         - for i in product.stars_empty
                             %i.fa.fa-star-o
-                    %form{'method': 'post', 'action': '{% url "add_to_cart" %}' }
-                        - csrf_token
-                        %input{'type': 'hidden', 'name': 'product', 'value': '{{ product.pk }}' }
-                        %button.btn.btn-primary.mt-2{'type': 'submit'}
-                            Add to Cart
+
+                    - ifnotequal product.quantity 0
+                        %form{'method': 'post', 'action': '{% url "add_to_cart" %}' }
+                            - csrf_token
+                            %input{'type': 'hidden', 'name': 'product', 'value': '{{ product.pk }}' }
+                            %button.btn.btn-primary.mt-2{'type': 'submit'}
+                                Add to Cart
+                    - else
+                        %button.btn.btn-danger.mt-2{'disabled'}
+                                Out of Stock
