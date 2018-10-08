@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from ecommerce.models import Product, Image, ProductCategory, Cart, Order, OrderList
+from ecommerce.models import Product, Image, ProductCategory, Cart
 from registration.models import User
 
 
@@ -81,5 +81,3 @@ class TestCartModel(TestCase):
         cart = Cart.objects.first()
         expected_name = "{0} - {1}".format(self.user.username, self.product.name)
         self.assertEqual(expected_name, str(cart))
-
-

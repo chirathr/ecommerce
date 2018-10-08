@@ -7,7 +7,8 @@ from .models import User
 
 class UserAdmin(BaseUserAdmin):
     model = User
-    fieldsets = BaseUserAdmin.fieldsets + ((_('Wallet Information'), {'fields': ('wallet_balance', )}), )
+    fieldsets = BaseUserAdmin.fieldsets + (
+        (_('Wallet Information'), {'fields': ('wallet_balance', )}), )
 
 
 admin.site.register(User, UserAdmin)

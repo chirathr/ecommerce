@@ -3,3 +3,4 @@ django-allauth
 django-hamlpy
 Pillow
 pytest
+flake8

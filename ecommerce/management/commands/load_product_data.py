@@ -2,8 +2,9 @@ import requests
 import random
 import json
 import urllib.request
+from urllib.error import HTTPError, URLError
 
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
 from ecommerce.models import Product, ProductCategory, Image
 from website import settings
 
@@ -22,7 +23,9 @@ class Command(BaseCommand):
         try:
             urllib.request.urlretrieve(image_location, image_path)
             return image_name, "products/{0}".format(image_name)
-        except:
+        except HTTPError:
+            return None, None
+        except URLError:
             return None, None
 
     def handle(self, *args, **options):
@@ -60,5 +63,9 @@ class Command(BaseCommand):
                 category=random_category
             )
 
-            Image.objects.create(product=product, name=image_name, image_path=image_path, featured_image=True)
-
+            Image.objects.create(
+                product=product,
+                name=image_name,
+                image_path=image_path,
+                featured_image=True
+            )

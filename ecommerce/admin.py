@@ -24,4 +24,3 @@ admin.site.register(ProductCategory)
 admin.site.register(Cart)
 admin.site.register(Order)
 admin.site.register(OrderList)
-

@@ -24,7 +24,8 @@ class Product(models.Model):
     discount_percent = models.FloatField(default=0.0)
     rating = models.IntegerField(blank=True, null=True)
     quantity = models.IntegerField(default=0)
-    category = models.ForeignKey(ProductCategory, on_delete=models.DO_NOTHING, blank=True, null=True)
+    category = models.ForeignKey(
+        ProductCategory, on_delete=models.DO_NOTHING, blank=True, null=True)
 
     def get_absolute_url(self):
         return reverse('product-detail', args=[str(self.pk)])

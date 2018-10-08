@@ -150,7 +150,8 @@ class CheckoutPageView(LoginRequiredMixin, TemplateView):
         # Add items in cart to order_list
         for cart_item in cart_list:
             cart_item.product.reduce_quantity(cart_item.quantity)
-            OrderList.objects.create(order=order, product=cart_item.product, quantity=cart_item.quantity)
+            OrderList.objects.create(
+                order=order, product=cart_item.product, quantity=cart_item.quantity)
             cart_item.delete()
 
         return order
