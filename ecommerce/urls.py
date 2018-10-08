@@ -1,7 +1,8 @@
 from django.urls import path
 from django.views.generic import TemplateView
 
-from ecommerce.views import ProductListView, UserCartListView, CartAddView, CartDeleteView, CheckoutPageView
+from ecommerce.views import ProductListView, UserCartListView, CartAddView, \
+    CartDeleteView, CheckoutPageView, OrderListView, OrderDetailView
 
 urlpatterns = [
     path('', ProductListView.as_view(), name='home'),
@@ -11,4 +12,6 @@ urlpatterns = [
          TemplateView.as_view(template_name='ecommerce/cannot_add_to_cart.html.haml'), name='cannot_add_to_cart'),
     path('cart/delete/', CartDeleteView.as_view(), name='delete_from_cart'),
     path('checkout/', CheckoutPageView.as_view(), name='checkout'),
+    path('order/', OrderListView.as_view(), name='order_list'),
+    path('order/<int:pk>/', OrderDetailView.as_view(), name='order_detail'),
 ]

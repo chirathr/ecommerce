@@ -84,10 +84,15 @@ class Order(models.Model):
     """
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     date = models.DateTimeField(auto_now=False, auto_now_add=True)
+    amount = models.FloatField(default=0)
 
     @property
     def order_list(self):
-        return self.order_list_set.all()
+        return self.orderlist_set.all()
+
+    @property
+    def items_count(self):
+        return len(self.order_list)
 
     def __str__(self):
         return "{0} - {0}".format(self.user.username, self.date)

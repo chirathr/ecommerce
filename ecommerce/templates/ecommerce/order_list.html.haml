@@ -1,0 +1,26 @@
+- extends 'base/base.haml'
+
+- block title
+    Orders
+
+- block body
+    %div.container.mt-5
+        %div.row
+            %div.col-12
+                %h1
+                    Orders
+            - for order in order_list
+                %div.col-6.row
+                    %div.col-12
+                        %hr
+                    %div.col-12
+                        %h6
+                            Order ID: {{ order.id }}
+
+                        %h6.text-success.float-left
+                            &#8377; {{ order.amount }}
+                            %small.pl-5.text-muted
+                                Items: {{ order.items_count }}
+
+                        %a.btn.btn-outline-primary.btn-sm.float-right{'href': '{% url "order_detail" order.pk %}'}
+                            Review

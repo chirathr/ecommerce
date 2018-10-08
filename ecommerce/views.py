@@ -101,12 +101,14 @@ class CartDeleteView(LoginRequiredMixin, TemplateView):
 
 class OrderListView(ListView):
     model = Order
+    template_name = "ecommerce/order_list.html.haml"
 
     def get_queryset(self):
         return self.model.objects.filter(user=self.request.user)
 
 
 class OrderDetailView(DetailView):
+    template_name = "ecommerce/order_detail.html.haml"
     model = Order
 
 
@@ -134,8 +136,8 @@ class CheckoutPageView(LoginRequiredMixin, TemplateView):
         self.request.user.wallet_balance -= order_price
         self.request.user.save()
 
-    def place_order_from_cart(self, cart_list):
-        order = Order.objects.create(user=self.request.user)
+    def place_order_from_cart(self, cart_list, total_amount):
+        order = Order.objects.create(user=self.request.user, amount=total_amount)
 
         # Add items in cart to order_list
         for cart_item in cart_list:
@@ -150,14 +152,14 @@ class CheckoutPageView(LoginRequiredMixin, TemplateView):
             # Shows cart is empty
             return redirect('cart')
 
-        total_price = get_total_price_of_cart(cart_list)
+        total_amount = get_total_price_of_cart(cart_list)
 
         # Check if wallet balance is there to place the order
-        if self.request.user.wallet_balance < total_price:
+        if self.request.user.wallet_balance < total_amount:
             return redirect('checkout')
 
-        self.reduce_user_balance(total_price)
-        order = self.place_order_from_cart(cart_list)
+        self.reduce_user_balance(total_amount)
+        order = self.place_order_from_cart(cart_list, total_amount)
 
         template_name = "ecommerce/order_successful.html.haml"
         context = {'order': order}

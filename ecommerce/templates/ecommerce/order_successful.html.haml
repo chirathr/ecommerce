@@ -12,5 +12,5 @@
                 %h6.mt-3
                     Order id: {{ order.pk }}
 
-                %a.btn.btn-outline-primary{'href': ''}
+                %a.btn.btn-outline-primary{'href': '{% url "order_detail" order.pk %}'}
                     Review order
