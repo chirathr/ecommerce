@@ -35,7 +35,6 @@ class Product(models.Model):
 
     @property
     def stars(self):
-        print(self.rating, 5-self.rating)
         return range(self.rating)
 
     @property

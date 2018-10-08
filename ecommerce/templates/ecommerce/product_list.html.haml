@@ -7,6 +7,9 @@
 - block body
 
     %div.row.mt-5.m-md-5
+        - if not product_list
+            %h3
+                No products found
         - for product in product_list
             %div.col-lg-3.col-md-4.col-6
                 %img.card-img-top{'src': '/media/{{ product.featured_image }}', 'alt': ''}

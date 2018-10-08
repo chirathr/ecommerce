@@ -9,6 +9,13 @@
                 %li.nav-item.active
                     %a.nav-link{'href': '{% url "home" %}' }
                         Home
+                %li.nav-item.dropdown
+                    %a.nav-link.dropdown-toggle#dropdownCategories{'href': '#', 'role': 'button', 'data-toggle': 'dropdown'}
+                        Products
+                    %div.dropdown-menu
+                        - for category in category_list
+                            %a.dropdown-item{'href': '{% url "home" %}?category={{ category.name }}'}
+                                {{ category.name }}
 
             %ul.navbar-nav.ml-auto.float-left
                 %li.nav-item

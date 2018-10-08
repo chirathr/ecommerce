@@ -3,12 +3,23 @@ from django.shortcuts import redirect, render
 from django.views.generic import TemplateView, DetailView, ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
 
-from ecommerce.models import Product, Cart, Order, OrderList
+from ecommerce.models import Product, Cart, Order, OrderList, ProductCategory
 
 
 class ProductListView(ListView):
     model = Product
     template_name = 'ecommerce/product_list.html.haml'
+
+    def get_queryset(self):
+        if 'category' in self.request.GET:
+            category = None
+            try:
+                category = ProductCategory.objects.get(name=self.request.GET.get("category"))
+            except ProductCategory.DoesNotExist:
+                return None
+            return self.model.objects.filter(category=category)
+        else:
+            return super(ProductListView, self).get_queryset()
 
 
 class ProductDetailView(DetailView):
