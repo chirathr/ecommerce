@@ -2,6 +2,17 @@
 
 A simple E-Commerce shopping site
 
+### Screenshots
+
+Home                       |    Products
+:-------------------------:|:-------------------------:
+![Home](screenshots/1.png) | ![Products](screenshots/2.png)
+Login                      | Shopping cart
+![Login](screenshots/3.png)|![Cart](screenshots/4.png)
+Checkout                   | 
+![Checkout](screenshots/5.png)|
+
+
 #### Setup
 
 This project only supports Python3. Install the python package requirements using `pip`.
