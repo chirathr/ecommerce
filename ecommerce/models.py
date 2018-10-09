@@ -44,7 +44,7 @@ class Product(models.Model):
 
     @property
     def featured_image(self):
-        image = self.image_set.filter(featured_image=True)
+        image = self.image_set.filter(image_type=Image.FEATURED_IMAGE)
         if image.count() > 0:
             return image[0].image_path
         return None
@@ -76,7 +76,6 @@ class Image(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
     image_path = models.ImageField(upload_to='products/')
-    featured_image = models.BooleanField(default=False)
     image_type = models.CharField(max_length=2, choices=IMAGE_TYPE, default=NORMAL_IMAGE)
 
     def __str__(self):

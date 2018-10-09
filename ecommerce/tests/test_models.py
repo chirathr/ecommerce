@@ -17,7 +17,7 @@ class TestProductModel(TestCase):
     def test_featured_image_is_returned(self):
         product = Product.objects.first()
         image = Image.objects.create(
-            product=product, name="image 1", image_path="1.jpg", featured_image=True)
+            product=product, name="image 1", image_path="1.jpg", image_type=Image.FEATURED_IMAGE)
 
         self.assertEqual(image.image_path, product.featured_image)
 
@@ -28,9 +28,9 @@ class TestProductModel(TestCase):
     def test_multiple_featured_images(self):
         product = Product.objects.first()
         image_1 = Image.objects.create(
-            product=product, name="image 1", image_path="1.jpg", featured_image=True)
+            product=product, name="image 1", image_path="1.jpg", image_type=Image.FEATURED_IMAGE)
         image_2 = Image.objects.create(
-            product=product, name="image 2", image_path="2.jpg", featured_image=True)
+            product=product, name="image 2", image_path="2.jpg", image_type=Image.FEATURED_IMAGE)
 
         expected_images = (image_1.image_path, image_2.image_path)
         self.assertIn(product.featured_image, expected_images)
@@ -78,7 +78,7 @@ class TestImageModel(TestCase):
         product = Product.objects.create(
             name="Name", price=50.0, discount_percent=9.99, quantity=10)
         Image.objects.create(
-            product=product, name="image 1", image_path="1.jpg", featured_image=True)
+            product=product, name="image 1", image_path="1.jpg", image_type=Image.FEATURED_IMAGE)
 
     def test_object_name_is_product_name_space_image_name(self):
         image = Image.objects.first()

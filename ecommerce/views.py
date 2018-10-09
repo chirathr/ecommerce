@@ -24,7 +24,7 @@ class ProductListView(ListView):
 
     def get_context_data(self, *args, object_list=None, **kwargs):
         context = super(ProductListView, self).get_context_data(*args, **kwargs)
-        banner_image_list = Image.objects.filter(banner_image=True).order_by('-name')
+        banner_image_list = Image.objects.filter(image_type=Image.BANNER_IMAGE).order_by('-name')
         if 'category' not in self.request.GET:
             if banner_image_list.count() <= 3:
                 context['banner_image_list'] = banner_image_list

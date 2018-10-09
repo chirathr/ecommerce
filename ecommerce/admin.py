@@ -15,7 +15,7 @@ class ProductAdmin(admin.ModelAdmin):
 
 
 class ImageAdmin(admin.ModelAdmin):
-    list_display = ('name', 'product', 'featured_image')
+    list_display = ('name', 'product', 'image_type', 'image_path')
 
 
 admin.site.register(Product, ProductAdmin)
