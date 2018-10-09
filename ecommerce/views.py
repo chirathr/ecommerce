@@ -160,7 +160,8 @@ class CheckoutPageView(LoginRequiredMixin, TemplateView):
 
         # Add items in cart to order_list
         for cart_item in cart_list:
-            cart_item.product.reduce_quantity(cart_item.quantity)
+            if not cart_item.product.reduce_quantity(cart_item.quantity):
+                raise IntegrityError
             OrderList.objects.create(
                 order=order, product=cart_item.product, quantity=cart_item.quantity)
             cart_item.delete()
@@ -182,7 +183,8 @@ class CheckoutPageView(LoginRequiredMixin, TemplateView):
         # Atomic transaction for placing order
         try:
             with transaction.atomic():
-                self.request.user.reduce_user_wallet_balance(total_amount)
+                if not self.request.user.reduce_user_wallet_balance(total_amount):
+                    raise IntegrityError
                 order = self.place_order_from_cart(cart_list, total_amount)
         except IntegrityError:
             return HttpResponseServerError()

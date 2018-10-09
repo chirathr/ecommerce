@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from ecommerce.models import Product, Image, ProductCategory, Cart
+from ecommerce.models import Product, Image, ProductCategory, Cart, Order
 from registration.models import User
 
 
@@ -47,6 +47,31 @@ class TestProductModel(TestCase):
         self.product.rating = 1
         self.assertEqual(range(4), self.product.stars_empty)
 
+    def test_reduce_product_quantity_returns_true(self):
+        order_quantity = 5
+        initial_quantity = 10
+        self.assertEqual(initial_quantity, self.product.quantity)
+        self.assertTrue(self.product.reduce_quantity(order_quantity))
+        self.assertEqual(initial_quantity - order_quantity, self.product.quantity)
+
+    def test_zero_order_quantity_does_not_change_value(self):
+        order_quantity = 0
+        initial_quantity = 10
+        self.assertFalse(self.product.reduce_quantity(order_quantity))
+        self.assertEqual(initial_quantity, self.product.quantity)
+
+    def test_negative_order_quantity_does_not_change_value(self):
+        order_quantity = -5
+        initial_quantity = 10
+        self.assertFalse(self.product.reduce_quantity(order_quantity))
+        self.assertEqual(initial_quantity, self.product.quantity)
+
+    def test_order_quantity_greater_than_available_quantity(self):
+        order_quantity = 15
+        initial_quantity = 10
+        self.assertFalse(self.product.reduce_quantity(order_quantity))
+        self.assertEqual(initial_quantity, self.product.quantity)
+
 
 class TestImageModel(TestCase):
     def setUp(self):
@@ -77,7 +102,7 @@ class TestCartModel(TestCase):
         self.user = User.objects.create_user(username="name", password="password")
         self.cart = Cart.objects.create(user=self.user, product=self.product, quantity=1)
 
-    def test_object_name_username_hyphen_product_name(self):
+    def test_object_name_is_username_hyphen_product_name(self):
         cart = Cart.objects.first()
         expected_name = "{0} - {1}".format(self.user.username, self.product.name)
         self.assertEqual(expected_name, str(cart))

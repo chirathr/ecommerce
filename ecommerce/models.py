@@ -50,8 +50,11 @@ class Product(models.Model):
         return None
 
     def reduce_quantity(self, order_quantity):
-        self.quantity -= order_quantity
-        self.save()
+        if 0 < order_quantity <= self.quantity:
+            self.quantity -= order_quantity
+            self.save()
+            return True
+        return False
 
     def __str__(self):
         return self.name
