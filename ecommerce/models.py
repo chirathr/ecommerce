@@ -27,7 +27,7 @@ class Product(models.Model):
     category = models.ForeignKey(
         ProductCategory, on_delete=models.DO_NOTHING, blank=True, null=True)
 
-    def get_absolute_url(self):
+    def get_absolute_url(self):     # pragma: no cover
         return reverse('product-detail', args=[str(self.pk)])
 
     @property
@@ -64,19 +64,20 @@ class Image(models.Model):
     """
     Image associated with a product
     """
+    FEATURED_IMAGE = 'FR'
+    BANNER_IMAGE = 'BR'
+    NORMAL_IMAGE = 'NR'
+
+    IMAGE_TYPE = (
+        ('FR', 'Featured Image'),
+        ('BR', 'Banner Image'),
+        ('NR', 'Normal Image')
+    )
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
     image_path = models.ImageField(upload_to='products/')
     featured_image = models.BooleanField(default=False)
-    banner_image = models.BooleanField(default=False)
-
-    def set_featured_image(self):
-        self.featured_image = True
-        self.banner_image = False
-
-    def set_banner_image(self):
-        self.featured_image = False
-        self.banner_image = True
+    image_type = models.CharField(max_length=2, choices=IMAGE_TYPE, default=NORMAL_IMAGE)
 
     def __str__(self):
         return "{0} - {1}".format(self.product.name, self.name)

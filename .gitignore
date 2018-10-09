@@ -7,3 +7,5 @@ db.sqlite3
 media/
 .coverage
 .pytest_cache
+htmlcov/
+.DS_Store
