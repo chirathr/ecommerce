@@ -104,10 +104,10 @@ class Order(models.Model):
 
     @property
     def order_list(self):
-        return self.orderlist_set.all()
+        return self.orderlist_set.all().order_by('product')
 
     @property
-    def items_count(self):
+    def order_list_count(self):
         return len(self.order_list)
 
     def __str__(self):

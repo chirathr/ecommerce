@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from ecommerce.models import Product, Image, ProductCategory, Cart, Order
+from ecommerce.models import Product, Image, ProductCategory, Cart, Order, OrderList
 from registration.models import User
 
 
@@ -110,12 +110,46 @@ class TestCartModel(TestCase):
 
 class TestOrderModel(TestCase):
     def setUp(self):
-        Product.objects.create(
-            name="Name", price=50.0, discount_percent=10, quantity=10, rating=4)
-        Product.objects.create(
-            name="Name 1", price=55.0, discount_percent=15, quantity=5, rating=2)
+        self.product1 = Product.objects.create(
+            name="Name 1", price=50.0, discount_percent=10, quantity=10, rating=4)
+        self.product2 = Product.objects.create(
+            name="Name 2", price=55.0, discount_percent=15, quantity=5, rating=2)
         self.user = User.objects.create_user(username="name", password="password")
         self.order = Order.objects.create(user=self.user, amount=105.0)
 
     def test_object_name_is_username_date(self):
-        pass
+        expected_object_name = "{0} - {0}".format(self.user.username, self.order.date)
+        order = Order.objects.first()
+        self.assertEqual(expected_object_name, str(order))
+
+    def test_order_list(self):
+        OrderList.objects.create(product=self.product1, order=self.order, quantity=1)
+        OrderList.objects.create(product=self.product2, order=self.order, quantity=2)
+
+        expected_order_list = OrderList.objects.all().order_by('product')
+        actual_order_list = self.order.order_list
+
+        for i in range(len(expected_order_list)):
+            self.assertEqual(str(expected_order_list[i]), str(actual_order_list[i]))
+
+    def test_order_list_count(self):
+        OrderList.objects.create(product=self.product1, order=self.order, quantity=1)
+        OrderList.objects.create(product=self.product2, order=self.order, quantity=2)
+
+        self.assertEqual(OrderList.objects.count(), self.order.order_list_count)
+
+
+class TestOrderListModel(TestCase):
+    def setUp(self):
+        self.product = Product.objects.create(
+            name="Name", price=50.0, discount_percent=10, quantity=10, rating=4)
+        self.user = User.objects.create_user(username="name", password="password")
+        self.order = Order.objects.create(user=self.user, amount=105.0)
+        self.order_list = OrderList.objects.create(
+            order=self.order, product=self.product, quantity=1)
+
+    def test_object_name_is_order_comma_product(self):
+        expected_object_name = "{0}, {1}".format(self.order, self.product)
+        order_list = OrderList.objects.first()
+
+        self.assertEqual(expected_object_name, str(order_list))
