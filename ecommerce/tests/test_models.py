@@ -106,3 +106,16 @@ class TestCartModel(TestCase):
         cart = Cart.objects.first()
         expected_name = "{0} - {1}".format(self.user.username, self.product.name)
         self.assertEqual(expected_name, str(cart))
+
+
+class TestOrderModel(TestCase):
+    def setUp(self):
+        Product.objects.create(
+            name="Name", price=50.0, discount_percent=10, quantity=10, rating=4)
+        Product.objects.create(
+            name="Name 1", price=55.0, discount_percent=15, quantity=5, rating=2)
+        self.user = User.objects.create_user(username="name", password="password")
+        self.order = Order.objects.create(user=self.user, amount=105.0)
+
+    def test_object_name_is_username_date(self):
+        pass
