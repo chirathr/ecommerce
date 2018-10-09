@@ -48,14 +48,10 @@ Linter test using Flake8
 flake8 .
 ```
 
-Coverage test
-
-```bash
-pytest --cov=.
-```
-
-Unit tests
+Unit tests and Coverage report.
 
 ```bash
 pytest
 ```
+
+The html coverage report will be generated and saved in the `htmlcov/` folder.

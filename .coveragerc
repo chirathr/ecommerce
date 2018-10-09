@@ -1,6 +1,9 @@
 [run]
 omit =
-    website/*
-    */migrations/*
-    */apps.py
-    */manage.py
+    website/*,
+    */migrations/*,
+    */apps.py,
+    */manage.py,
+    *tests/*,
+    *urls.py,
+    *wsgi/*
