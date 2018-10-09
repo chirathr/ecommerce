@@ -4,7 +4,7 @@ from django.views.generic import TemplateView, DetailView, ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction, IntegrityError
 
-from ecommerce.models import Product, Cart, Order, OrderList, ProductCategory
+from ecommerce.models import Product, Cart, Order, OrderList, ProductCategory, Image
 
 
 class ProductListView(ListView):
@@ -21,6 +21,17 @@ class ProductListView(ListView):
             return self.model.objects.filter(category=category)
         else:
             return super(ProductListView, self).get_queryset()
+
+    def get_context_data(self, *args, object_list=None, **kwargs):
+        context = super(ProductListView, self).get_context_data(*args, **kwargs)
+        banner_image_list = Image.objects.filter(banner_image=True).order_by('-name')
+        if 'category' not in self.request.GET:
+            if banner_image_list.count() <= 3:
+                context['banner_image_list'] = banner_image_list
+            else:
+                # limit to 3 featured images for the carousal
+                context['banner_image_list'] = banner_image_list[:3]
+        return context
 
 
 class ProductDetailView(DetailView):

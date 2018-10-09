@@ -20,3 +20,8 @@
   min-width: 100%;
   height: 32rem;
 }
+
+.text-white-blend-difference {
+  color: #420d0d;
+  mix-blend-mode: darken;
+}

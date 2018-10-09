@@ -4,38 +4,139 @@
 - block title
     Products
 
+- block css
+    %link{'rel': 'stylesheet', 'href': '{% static "ecommerce/css/product_list.css" %}' }
+
 - block body
+    %div.featuredImageCarousel.carousal.slide{'data-ride': 'carousel'}
+        %ol.carousel-indicators
+            - for image in banner_image_list
+                - if forloop.first
+                    %li.active{'data-target': '#featuredImageCarousel', 'data-slide-to': '{{ forloop.counter  }}', 'href': '#'}
+                - else
+                    %li{'data-target': '#featuredImageCarousel', 'data-slide-to': '{{ forloop.counter  }}', 'href': '#'}
+        %div.carousel-inner
+            - for image in banner_image_list
+                - if forloop.first
+                    %div.carousel-item.active
+                        %img.first-slide{'src': '/media/{{ image.image_path }}', 'alt': '{{ image.name }}' }
+                        %div.container
+                            %div.carousel-caption.text-right
+                                %h1.text-white-blend-difference
+                                    {{ image.product.name }}
+                                %p.text-white-blend-difference
+                                    {{ image.product.description|truncatechars:30|safe }}
+                                %p
+                                    %form{'method': 'post', 'action': '{% url "add_to_cart" %}' }
+                                        - csrf_token
+                                        %input{'type': 'hidden', 'name': 'product', 'value': '{{ image.product.pk }}' }
+                                        %button.btn.btn-lg.btn-primary{'role': 'button', 'type': 'submit'}
+                                            Add to Cart
 
-    %div.row.mt-5.m-md-5
-        - if not product_list
-            %h3
-                No products found
-        - for product in product_list
-            %div.col-lg-3.col-md-4.col-6
-                %img.card-img-top{'src': '/media/{{ product.featured_image }}', 'alt': ''}
-                %div.card-body
-                    %h5.card-title
-                        {{ product.name }}
-                    %p.card-text
-                        {{ product.description|truncatechars:60|safe }}
-                    %h6.card-text.text-success
-                        &#8377; {{ product.discount_price }}
-                        %small.text-danger
-                            &#8377;
-                            %strike {{ product.price }}
-                        %small.text-muted - {{ product.discount_percent }}% off
-                    %p.card-text
-                        - for i in product.stars
-                            %i.fa.fa-star
-                        - for i in product.stars_empty
-                            %i.fa.fa-star-o
+                - else
+                    %div.carousel-item
+                        %img.first-slide{'src': '/media/{{ image.image_path }}', 'alt': '{{ image.name }}' }
+                        %div.container
+                            %div.carousel-caption.text-right
+                                %h1.text-white-blend-difference
+                                    {{ image.product.name }}
+                                %p.text-white-blend-difference
+                                    {{ image.product.description|truncatechars:30|safe }}
+                                %p
+                                    %form{'method': 'post', 'action': '{% url "add_to_cart" %}' }
+                                        - csrf_token
+                                        %input{'type': 'hidden', 'name': 'product', 'value': '{{ product.pk }}' }
+                                        %button.btn.btn-lg.btn-primary{'role': 'button', 'type': 'submit'}
+                                            Add to Cart
 
-                    - ifnotequal product.quantity 0
-                        %form{'method': 'post', 'action': '{% url "add_to_cart" %}' }
-                            - csrf_token
-                            %input{'type': 'hidden', 'name': 'product', 'value': '{{ product.pk }}' }
-                            %button.btn.btn-primary.mt-2{'type': 'submit'}
-                                Add to Cart
-                    - else
-                        %button.btn.btn-danger.mt-2{'disabled'}
-                                Out of Stock
+
+
+    /
+        <div id="myCarousel" class="carousel slide" data-ride="carousel">
+        <ol class="carousel-indicators">
+          <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
+          <li data-target="#myCarousel" data-slide-to="1"></li>
+          <li data-target="#myCarousel" data-slide-to="2"></li>
+        </ol>
+
+        <div class="carousel-inner">
+          <div class="carousel-item active">
+            <img class="first-slide" src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" alt="First slide">
+            <div class="container">
+              <div class="carousel-caption text-left">
+                <h1>Example headline.</h1>
+                <p>Cras justo odio, dapibus ac facilisis in, egestas eget quam. Donec id elit non mi porta gravida at eget metus. Nullam id dolor id nibh ultricies vehicula ut id elit.</p>
+                <p><a class="btn btn-lg btn-primary" href="#" role="button">Sign up today</a></p>
+              </div>
+            </div>
+          </div>
+          <div class="carousel-item">
+            <img class="second-slide" src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" alt="Second slide">
+            <div class="container">
+              <div class="carousel-caption">
+                <h1>Another example headline.</h1>
+                <p>Cras justo odio, dapibus ac facilisis in, egestas eget quam. Donec id elit non mi porta gravida at eget metus. Nullam id dolor id nibh ultricies vehicula ut id elit.</p>
+                <p><a class="btn btn-lg btn-primary" href="#" role="button">Learn more</a></p>
+              </div>
+            </div>
+          </div>
+          <div class="carousel-item">
+            <img class="third-slide" src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" alt="Third slide">
+            <div class="container">
+              <div class="carousel-caption text-right">
+                <h1>One more for good measure.</h1>
+                <p>Cras justo odio, dapibus ac facilisis in, egestas eget quam. Donec id elit non mi porta gravida at eget metus. Nullam id dolor id nibh ultricies vehicula ut id elit.</p>
+                <p><a class="btn btn-lg btn-primary" href="#" role="button">Browse gallery</a></p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <a class="carousel-control-prev" href="#myCarousel" role="button" data-slide="prev">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="sr-only">Previous</span>
+        </a>
+        <a class="carousel-control-next" href="#myCarousel" role="button" data-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="sr-only">Next</span>
+        </a>
+        </div>
+
+    %div.container.mt-4
+        %div.row
+
+            - if not product_list
+                %h3
+                    No products found
+            - else
+                %div.col-12.pb-5
+                    %h1
+                        Products
+                - for product in product_list
+                    %div.col-lg-3.col-md-4.col-6
+                        %img.card-img-top{'src': '/media/{{ product.featured_image }}', 'alt': ''}
+                        %div.card-body
+                            %h5.card-title
+                                {{ product.name }}
+                            %p.card-text
+                                {{ product.description|truncatechars:60|safe }}
+                            %h6.card-text.text-success
+                                &#8377; {{ product.discount_price }}
+                                %small.text-danger
+                                    &#8377;
+                                    %strike {{ product.price }}
+                                %small.text-muted - {{ product.discount_percent }}% off
+                            %p.card-text
+                                - for i in product.stars
+                                    %i.fa.fa-star
+                                - for i in product.stars_empty
+                                    %i.fa.fa-star-o
+
+                            - ifnotequal product.quantity 0
+                                %form{'method': 'post', 'action': '{% url "add_to_cart" %}' }
+                                    - csrf_token
+                                    %input{'type': 'hidden', 'name': 'product', 'value': '{{ product.pk }}' }
+                                    %button.btn.btn-primary.mt-2{'type': 'submit'}
+                                        Add to Cart
+                            - else
+                                %button.btn.btn-danger.mt-2{'disabled'}
+                                        Out of Stock

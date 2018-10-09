@@ -65,6 +65,15 @@ class Image(models.Model):
     name = models.CharField(max_length=200)
     image_path = models.ImageField(upload_to='products/')
     featured_image = models.BooleanField(default=False)
+    banner_image = models.BooleanField(default=False)
+
+    def set_featured_image(self):
+        self.featured_image = True
+        self.banner_image = False
+
+    def set_banner_image(self):
+        self.featured_image = False
+        self.banner_image = True
 
     def __str__(self):
         return "{0} - {1}".format(self.product.name, self.name)
