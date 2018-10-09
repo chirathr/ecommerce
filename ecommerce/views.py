@@ -34,10 +34,6 @@ class ProductListView(ListView):
         return context
 
 
-class ProductDetailView(DetailView):
-    model = Product
-
-
 def get_total_price_of_cart(cart_list):
     total = 0
     for cart_item in cart_list:
@@ -46,12 +42,12 @@ def get_total_price_of_cart(cart_list):
     return total
 
 
-class UserCartListView(LoginRequiredMixin, TemplateView):
+class CartListView(LoginRequiredMixin, TemplateView):
     template_name = 'ecommerce/cart.html.haml'
     model = Cart
 
     def get_context_data(self, **kwargs):
-        context = super(UserCartListView, self).get_context_data(**kwargs)
+        context = super(CartListView, self).get_context_data(**kwargs)
         context['cart_list'] = Cart.objects.filter(user=self.request.user)
         context['total'] = get_total_price_of_cart(cart_list=context["cart_list"])
         return context
