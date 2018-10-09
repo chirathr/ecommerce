@@ -40,12 +40,11 @@ flake8 .
 Coverage test
 
 ```bash
-coverage run --source='.' manage.py test -v 2
-coverage report
+pytest --cov=.
 ```
 
 Unit tests
 
 ```bash
-python manage.py test
+pytest
 ```
