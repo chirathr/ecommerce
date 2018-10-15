@@ -14,4 +14,6 @@ urlpatterns = [
     path('checkout/', CheckoutPageView.as_view(), name='checkout'),
     path('order/', OrderListView.as_view(), name='order_list'),
     path('order/<int:pk>/', OrderDetailView.as_view(), name='order_detail'),
+    path('checkout/failed/', TemplateView.as_view(
+        template_name='ecommerce/checkout_failed.html.haml'), name='checkout_failed'),
 ]

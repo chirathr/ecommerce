@@ -1,4 +1,4 @@
-from django.http import Http404, HttpResponseServerError
+from django.http import Http404
 from django.shortcuts import redirect, render
 from django.views.generic import TemplateView, DetailView, ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -185,7 +185,9 @@ class CheckoutPageView(LoginRequiredMixin, TemplateView):
                     raise IntegrityError
                 order = self.place_order_from_cart(cart_list, total_amount)
         except IntegrityError:
-            return HttpResponseServerError()
+            return redirect('checkout_failed')
+
+        print("Sucess")
 
         template_name = "ecommerce/order_successful.html.haml"
         context = {'order': order}

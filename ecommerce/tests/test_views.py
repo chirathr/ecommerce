@@ -2,7 +2,7 @@ import pytest
 from django.test import TestCase
 from django.urls import reverse
 
-from ecommerce.models import Product, ProductCategory, Cart
+from ecommerce.models import Product, ProductCategory, Cart, Order, OrderList
 from ecommerce.views import get_total_price_of_cart
 
 
@@ -90,12 +90,14 @@ def test_get_total_price_of_cart_with_empty_cart():
     assert 0 == get_total_price_of_cart(Cart.objects.filter(user=user))
 
 
-class ProductTestCase(TestCase):
+class EcommerceTestCase(TestCase):
 
     def login(self):
         self.credentials = {
             'username': 'testuser',
-            'password': 'secret@123'}
+            'password': 'secret@123',
+            'wallet_balance': 400
+        }
         self.user = User.objects.create_user(**self.credentials)
         self.client.login(**self.credentials)
 
@@ -114,9 +116,20 @@ class ProductTestCase(TestCase):
         Cart.objects.create(user=self.user, product=self.p1, quantity=2)
         Cart.objects.create(user=self.user, product=self.p2, quantity=1)
 
+    def create_order(self):
+        if not (hasattr(self, 'p1') and hasattr(self, 'p2')):
+            self.p1 = Product.objects.create(
+                name="Product A", price=100.0, discount_percent=15, quantity=3, rating=4)
+            self.p2 = Product.objects.create(
+                name="Product B", price=230.0, discount_percent=10, quantity=4, rating=4)
 
-# Test CardListView
-class TestCartListView(ProductTestCase):
+        self.order = Order.objects.create(
+            user=self.user, amount=(self.p1.discount_price + self.p2.discount_price))
+        OrderList.objects.create(order=self.order, product=self.p1, quantity=1)
+        OrderList.objects.create(order=self.order, product=self.p2, quantity=1)
+
+
+class TestCartListView(EcommerceTestCase):
     url = reverse('cart')
 
     def test_redirects_to_login_if_not_logged_in(self):
@@ -149,7 +162,7 @@ class TestCartListView(ProductTestCase):
         self.assertEqual(expected_total, response.context['total'])
 
 
-class TestCartAddView(ProductTestCase):
+class TestCartAddView(EcommerceTestCase):
     url = reverse('add_to_cart')
 
     def test_get_request_redirects_home(self):
@@ -208,8 +221,20 @@ class TestCartAddView(ProductTestCase):
         response = self.client.post(self.url, data=data)
         self.assertEqual(response.status_code, 404)
 
+    def test_add_to_cart_product_not_available(self):
+        self.login()
+        self.create_products()
+        self.p1.quantity = 0
+        self.p1.save()
+        data = {
+            'product': self.p1.pk
+        }
 
-class TestCartDeleteView(ProductTestCase):
+        response = self.client.post(self.url, data=data, follow=True)
+        self.assertTemplateUsed(response, 'ecommerce/cannot_add_to_cart.html.haml')
+
+
+class TestCartDeleteView(EcommerceTestCase):
     url = reverse('delete_from_cart')
 
     def test_get_request_redirects_home(self):
@@ -260,28 +285,99 @@ class TestCartDeleteView(ProductTestCase):
         response = self.client.post(self.url, data=data)
         self.assertEqual(response.status_code, 404)
 
-# OrderListView
-# Returns all orders of correct user
-# Test template
 
-# OrderDetailView
-# Returns correct template
-# Returns correct order with all the products
+class TestOrderListView(EcommerceTestCase):
+    url = reverse('order_list')
 
-# CheckOut page View
-# Test template
-# test get cart list function
-# get request
-#   - check wallet balance
-#   - check cart_list
-#   - check total_price
-#   - empty cart list redirects to cart
-# place order form cart
-#   - with empty cart list
-#   - Negative total_amount, 0 total_amount
-#   - Check if creates correct order with correct items
-# post
-#   - post with empty cart
-#   - post with less wallet balance
-#   - check template on success
-#   - check order in context
+    def test_template_is_correct(self):
+        self.login()
+        response = self.client.get(self.url)
+        self.assertTemplateUsed(response, 'ecommerce/order_list.html.haml')
+
+    def test_order_list_of_correct_user(self):
+        self.login()
+        self.create_order()
+
+        response = self.client.get(self.url)
+        expected_order = Order.objects.filter(user=self.user)
+        self.assertEqual(list(response.context['order_list']), list(expected_order))
+
+
+class TestOrderDetailView(EcommerceTestCase):
+
+    def test_template_is_correct(self):
+        self.login()
+        self.create_order()
+        url = reverse('order_detail', args={self.order.pk})
+        response = self.client.get(url)
+        self.assertTemplateUsed(response, 'ecommerce/order_detail.html.haml')
+
+
+class TestCheckoutPageView(EcommerceTestCase):
+
+    url = reverse('checkout')
+
+    def test_template_is_correct(self):
+        self.login()
+        self.create_cart_items()
+
+        response = self.client.get(self.url)
+        self.assertTemplateUsed(response, 'ecommerce/checkout.html.haml')
+
+    def test_get_cart_list(self):
+        self.login()
+        self.create_cart_items()
+
+        response = self.client.get(self.url)
+        expected_cart_list = Cart.objects.filter(user=self.user)
+        self.assertEqual(list(response.context['cart_list']), list(expected_cart_list))
+
+    def test_empty_cart_list(self):
+        self.login()
+
+        response = self.client.get(self.url, follow=True)
+        self.assertTemplateUsed(response, 'ecommerce/cart.html.haml')
+
+    def test_wallet_balance_in_context(self):
+        self.login()
+        self.create_cart_items()
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.context['wallet_balance'], self.user.wallet_balance)
+
+    def test_total_price_in_context(self):
+        self.login()
+        self.create_cart_items()
+        self.user.wallet_balance = 100
+        self.user.save()
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.context['wallet_balance'], self.user.wallet_balance)
+
+    def test_checkout_with_empty_cart(self):
+        self.login()
+        response = self.client.post(self.url, follow=True)
+        self.assertTemplateUsed(response, 'ecommerce/cart.html.haml')
+
+    def test_checkout_with_negative_total_cart_amount(self):
+        self.login()
+        self.create_cart_items()
+        self.user.wallet_balance = 0
+        self.user.save()
+
+        response = self.client.post(self.url, follow=True)
+        self.assertTemplateUsed(response, 'ecommerce/checkout.html.haml')
+
+    def test_redirect_to_order_success(self):
+        self.login()
+        self.create_cart_items()
+
+        response = self.client.post(self.url, follow=True)
+        self.assertTemplateUsed(response, 'ecommerce/order_successful.html.haml')
+
+    def test_order_in_redirect_after_success(self):
+        self.login()
+        self.create_cart_items()
+
+        response = self.client.post(self.url, follow=True)
+        self.assertEqual(response.context['order'], Order.objects.get(user=self.user))

@@ -1,14 +1,14 @@
 - extends 'base/base.haml'
 
 - block title
-    Cannot add to cart
+    Checkout failed
 
 - block body
     %div.container.m-5
         %h2.mt-5
-            Sorry, this item is out of stock
+            Sorry, order cannot be places.
         %h6.mt-3
-            Cannot add this item to your shopping cart, please try again later.
+            Your order cannot be placed please try again later.
 
         %a.btn.btn-lg.btn-outline-primary.mt-3{'href': '{% url "home" %}' }
-            Go back
+            Back to home
