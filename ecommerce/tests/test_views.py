@@ -2,7 +2,7 @@ import pytest
 from django.test import TestCase
 from django.urls import reverse
 
-from ecommerce.models import Product, ProductCategory, Cart, Order, OrderList
+from ecommerce.models import Product, ProductCategory, Cart, Order, OrderList, Image
 from ecommerce.views import get_total_price_of_cart
 
 
@@ -19,6 +19,10 @@ class TestProductListView(TestCase):
             name="Product A", price=100.0, discount_percent=15, quantity=3, rating=4)
         self.product_2 = Product.objects.create(
             name="Product B", price=50.0, discount_percent=10, quantity=2, rating=5)
+        self.product_3 = Product.objects.create(
+            name="Product C", price=150.0, discount_percent=2, quantity=1, rating=2)
+        self.product_4 = Product.objects.create(
+            name="Product D", price=990.0, discount_percent=20, quantity=5, rating=1)
 
     def test_template_is_product_list(self):
         """
@@ -61,6 +65,48 @@ class TestProductListView(TestCase):
         self.populate_products()
         response = self.client.get(self.url + '?category=Category1')
         self.assertContains(response, 'No products')
+
+    def test_banner_image(self):
+        self.populate_products()
+        Image.objects.create(
+            product=self.product_1,
+            name=self.product_1.name,
+            image_path="",
+            image_type=Image.BANNER_IMAGE)
+        Image.objects.create(
+            product=self.product_2,
+            name=self.product_2.name,
+            image_path="",
+            image_type=Image.BANNER_IMAGE)
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.context['banner_image_list'].count(), 2)
+
+    def test_banner_images_greater_than_three(self):
+        self.populate_products()
+        Image.objects.create(
+            product=self.product_1,
+            name=self.product_1.name,
+            image_path="",
+            image_type=Image.BANNER_IMAGE)
+        Image.objects.create(
+            product=self.product_2,
+            name=self.product_2.name,
+            image_path="",
+            image_type=Image.BANNER_IMAGE)
+        Image.objects.create(
+            product=self.product_3,
+            name=self.product_3.name,
+            image_path="",
+            image_type=Image.BANNER_IMAGE)
+        Image.objects.create(
+            product=self.product_4,
+            name=self.product_4.name,
+            image_path="",
+            image_type=Image.BANNER_IMAGE)
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.context['banner_image_list'].count(), 3)
 
 
 @pytest.mark.django_db
@@ -165,6 +211,10 @@ class TestCartListView(EcommerceTestCase):
 class TestCartAddView(EcommerceTestCase):
     url = reverse('add_to_cart')
 
+    def test_redirects_to_login_if_not_logged_in(self):
+        response = self.client.get(self.url, follow=True)
+        self.assertTemplateUsed(response, template_name='account/login.html.haml')
+
     def test_get_request_redirects_home(self):
         self.login()
         response = self.client.get(self.url, follow=True)
@@ -233,9 +283,36 @@ class TestCartAddView(EcommerceTestCase):
         response = self.client.post(self.url, data=data, follow=True)
         self.assertTemplateUsed(response, 'ecommerce/cannot_add_to_cart.html.haml')
 
+    def test_add_product_id_not_int(self):
+        self.login()
+        data = {
+            'product': "Not int"
+        }
+        response = self.client.post(self.url, data=data)
+        self.assertEqual(response.status_code, 404)
+
+    def test_add_product_with_quantity_less_than_required(self):
+        self.login()
+        self.create_products()
+
+        data = {
+            'product': self.p1.pk
+        }
+
+        self.client.post(self.url, data=data, follow=True)
+        self.p1.quantity = 1
+        self.p1.save()
+
+        response = self.client.post(self.url, data=data, follow=True)
+        self.assertTemplateUsed(response, 'ecommerce/cannot_add_to_cart.html.haml')
+
 
 class TestCartDeleteView(EcommerceTestCase):
     url = reverse('delete_from_cart')
+
+    def test_redirects_to_login_if_not_logged_in(self):
+        response = self.client.get(self.url, follow=True)
+        self.assertTemplateUsed(response, template_name='account/login.html.haml')
 
     def test_get_request_redirects_home(self):
         self.login()
@@ -289,6 +366,10 @@ class TestCartDeleteView(EcommerceTestCase):
 class TestOrderListView(EcommerceTestCase):
     url = reverse('order_list')
 
+    def test_redirects_to_login_if_not_logged_in(self):
+        response = self.client.get(self.url, follow=True)
+        self.assertTemplateUsed(response, template_name='account/login.html.haml')
+
     def test_template_is_correct(self):
         self.login()
         response = self.client.get(self.url)
@@ -305,6 +386,13 @@ class TestOrderListView(EcommerceTestCase):
 
 class TestOrderDetailView(EcommerceTestCase):
 
+    def test_redirects_to_login_if_not_logged_in(self):
+        self.user = User.objects.create(username="User", password="123456")
+        self.create_order()
+        url = reverse('order_detail', args={self.order.pk})
+        response = self.client.get(url, follow=True)
+        self.assertTemplateUsed(response, template_name='account/login.html.haml')
+
     def test_template_is_correct(self):
         self.login()
         self.create_order()
@@ -314,8 +402,11 @@ class TestOrderDetailView(EcommerceTestCase):
 
 
 class TestCheckoutPageView(EcommerceTestCase):
-
     url = reverse('checkout')
+
+    def test_redirects_to_login_if_not_logged_in(self):
+        response = self.client.get(self.url, follow=True)
+        self.assertTemplateUsed(response, template_name='account/login.html.haml')
 
     def test_template_is_correct(self):
         self.login()
