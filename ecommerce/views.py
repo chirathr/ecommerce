@@ -118,7 +118,7 @@ class CartDeleteView(LoginRequiredMixin, TemplateView):
         return redirect(self.success_url)
 
 
-class OrderListView(ListView):
+class OrderListView(LoginRequiredMixin, ListView):
     model = Order
     template_name = "ecommerce/order_list.html.haml"
 
@@ -126,7 +126,7 @@ class OrderListView(ListView):
         return self.model.objects.filter(user=self.request.user)
 
 
-class OrderDetailView(DetailView):
+class OrderDetailView(LoginRequiredMixin, DetailView):
     template_name = "ecommerce/order_detail.html.haml"
     model = Order
 
@@ -152,6 +152,8 @@ class CheckoutPageView(LoginRequiredMixin, TemplateView):
         return render(request, self.template_name, context)
 
     def place_order_from_cart(self, cart_list, total_amount):
+        if total_amount <= 0 or cart_list is None:
+            raise IntegrityError
         order = Order.objects.create(user=self.request.user, amount=total_amount)
 
         # Add items in cart to order_list
