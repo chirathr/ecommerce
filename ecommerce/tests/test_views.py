@@ -91,26 +91,30 @@ def test_get_total_price_of_cart_with_empty_cart():
     assert 0 == get_total_price_of_cart(Cart.objects.filter(user=user))
 
 
-# Test CardListView
-class TestCartListView(TestCase):
-    def setUp(self):
-        self.url = reverse('cart')
+class LoginTestCase(TestCase):
+
+    def login(self):
         self.credentials = {
             'username': 'testuser',
             'password': 'secret@123'}
         self.user = User.objects.create_user(**self.credentials)
-
-    def login(self):
         self.client.login(**self.credentials)
 
-    def create_cart_items(self):
-        p1 = Product.objects.create(
+    def create_products(self):
+        self.p1 = Product.objects.create(
             name="Product A", price=100.0, discount_percent=15, quantity=3, rating=4)
-        p2 = Product.objects.create(
+        self.p2 = Product.objects.create(
             name="Product B", price=230.0, discount_percent=10, quantity=4, rating=4)
 
-        Cart.objects.create(user=self.user, product=p1, quantity=2)
-        Cart.objects.create(user=self.user, product=p2, quantity=1)
+    def create_cart_items(self):
+        Cart.objects.create(user=self.user, product=self.p1, quantity=2)
+        Cart.objects.create(user=self.user, product=self.p2, quantity=1)
+
+
+# Test CardListView
+class TestCartListView(LoginTestCase):
+    def setUp(self):
+        self.url = reverse('cart')
 
     def test_redirects_to_login_if_not_logged_in(self):
         response = self.client.get(self.url, follow=True)
@@ -127,6 +131,7 @@ class TestCartListView(TestCase):
 
     def test_correct_cart_list_in_context(self):
         self.login()
+        self.create_products()
         self.create_cart_items()
 
         response = self.client.get(self.url)
@@ -135,6 +140,7 @@ class TestCartListView(TestCase):
 
     def test_correct_total_in_context(self):
         self.login()
+        self.create_products()
         self.create_cart_items()
 
         response = self.client.get(self.url)
@@ -142,12 +148,67 @@ class TestCartListView(TestCase):
         self.assertEqual(expected_total, response.context['total'])
 
 
-# Test CartAddView
-# check get request returns home template
-# check post request adds item to cart and redirects to cart
-# check with unknown product, raises http404
-# Check with already existing cart item
-# check request without product, raises http404
+class TestCartAddView(LoginTestCase):
+    def setUp(self):
+        self.url = reverse('add_to_cart')
+
+    def test_get_request_redirects_home(self):
+        self.login()
+        response = self.client.get(self.url, follow=True)
+        self.assertTemplateUsed(response, 'ecommerce/product_list.html.haml')
+
+    def test_add_item_to_cart(self):
+        self.login()
+        self.create_products()
+        self.create_cart_items()
+
+        expected_product = Product.objects.first()
+        data = {
+            'product': expected_product.pk
+        }
+
+        self.client.post(self.url, data=data)
+        cart = Cart.objects.first()
+        self.assertEqual(cart.product, expected_product)
+
+    def test_add_item_to_cart_redirects_to_cart(self):
+        self.login()
+        self.create_products()
+
+        data = {
+            'product': Product.objects.first().pk
+        }
+
+        response = self.client.post(self.url, data=data, follow=True)
+        self.assertTemplateUsed(response, 'ecommerce/cart.html.haml')
+
+    def test_add_item_to_cart_with_unknown_product(self):
+        self.login()
+        data = {
+            'product': 100
+        }
+        response = self.client.post(self.url, data=data, follow=True)
+        self.assertEqual(response.status_code, 404)
+
+    def test_add_existing_item_to_cart_increases_quantity(self):
+        self.login()
+        self.create_products()
+
+        data = {
+            'product': Product.objects.first().pk
+        }
+        self.client.post(self.url, data=data, follow=True)
+        self.assertEqual(Cart.objects.first().quantity, 1)
+        self.client.post(self.url, data=data, follow=True)
+        self.assertEqual(Cart.objects.first().quantity, 2)
+
+    def test_wrong_post_request(self):
+        self.login()
+
+        data = {}
+        response = self.client.post(self.url, data=data)
+        self.assertEqual(response.status_code, 404)
+
 
 # OrderListView
 # Returns all orders of correct user
