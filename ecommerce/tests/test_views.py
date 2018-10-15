@@ -11,8 +11,7 @@ from registration.models import User
 
 
 class TestProductListView(TestCase):
-    def setUp(self):
-        self.url = reverse('home')
+    url = reverse('home')
 
     def populate_products(self):
         self.user = User.objects.create_user(username="Bob", password="12345")
@@ -91,7 +90,7 @@ def test_get_total_price_of_cart_with_empty_cart():
     assert 0 == get_total_price_of_cart(Cart.objects.filter(user=user))
 
 
-class LoginTestCase(TestCase):
+class ProductTestCase(TestCase):
 
     def login(self):
         self.credentials = {
@@ -107,14 +106,18 @@ class LoginTestCase(TestCase):
             name="Product B", price=230.0, discount_percent=10, quantity=4, rating=4)
 
     def create_cart_items(self):
+        if not (hasattr(self, 'p1') and hasattr(self, 'p2')):
+            self.p1 = Product.objects.create(
+                name="Product A", price=100.0, discount_percent=15, quantity=3, rating=4)
+            self.p2 = Product.objects.create(
+                name="Product B", price=230.0, discount_percent=10, quantity=4, rating=4)
         Cart.objects.create(user=self.user, product=self.p1, quantity=2)
         Cart.objects.create(user=self.user, product=self.p2, quantity=1)
 
 
 # Test CardListView
-class TestCartListView(LoginTestCase):
-    def setUp(self):
-        self.url = reverse('cart')
+class TestCartListView(ProductTestCase):
+    url = reverse('cart')
 
     def test_redirects_to_login_if_not_logged_in(self):
         response = self.client.get(self.url, follow=True)
@@ -131,7 +134,6 @@ class TestCartListView(LoginTestCase):
 
     def test_correct_cart_list_in_context(self):
         self.login()
-        self.create_products()
         self.create_cart_items()
 
         response = self.client.get(self.url)
@@ -140,7 +142,6 @@ class TestCartListView(LoginTestCase):
 
     def test_correct_total_in_context(self):
         self.login()
-        self.create_products()
         self.create_cart_items()
 
         response = self.client.get(self.url)
@@ -148,9 +149,8 @@ class TestCartListView(LoginTestCase):
         self.assertEqual(expected_total, response.context['total'])
 
 
-class TestCartAddView(LoginTestCase):
-    def setUp(self):
-        self.url = reverse('add_to_cart')
+class TestCartAddView(ProductTestCase):
+    url = reverse('add_to_cart')
 
     def test_get_request_redirects_home(self):
         self.login()
@@ -159,7 +159,6 @@ class TestCartAddView(LoginTestCase):
 
     def test_add_item_to_cart(self):
         self.login()
-        self.create_products()
         self.create_cart_items()
 
         expected_product = Product.objects.first()
@@ -209,6 +208,57 @@ class TestCartAddView(LoginTestCase):
         response = self.client.post(self.url, data=data)
         self.assertEqual(response.status_code, 404)
 
+
+class TestCartDeleteView(ProductTestCase):
+    url = reverse('delete_from_cart')
+
+    def test_get_request_redirects_home(self):
+        self.login()
+        response = self.client.get(self.url, follow=True)
+        self.assertTemplateUsed(response, 'ecommerce/product_list.html.haml')
+
+    def test_delete_unknown_product_from_cart(self):
+        self.login()
+        data = {
+            'product': 100
+        }
+        response = self.client.post(self.url, data=data)
+        self.assertEqual(response.status_code, 404)
+
+    def test_delete_from_cart(self):
+        self.login()
+        self.create_cart_items()
+
+        cart_item = Cart.objects.get(user=self.user, product=self.p1)
+        self.assertIn(cart_item, list(Cart.objects.all()))
+        data = {
+            'product': self.p1.pk
+        }
+        self.client.post(self.url, data=data)
+        self.assertNotIn(cart_item, list(Cart.objects.all()))
+
+    def test_delete_product_id_not_int(self):
+        self.login()
+        data = {
+            'product': "Not int"
+        }
+        response = self.client.post(self.url, data=data)
+        self.assertEqual(response.status_code, 404)
+
+    def test_delete_product_not_in_cart(self):
+        self.login()
+        self.create_products()
+        data = {
+            'product': self.p1.pk
+        }
+        response = self.client.post(self.url, data=data)
+        self.assertEqual(response.status_code, 404)
+
+    def test_empty_post_request(self):
+        self.login()
+        data = {}
+        response = self.client.post(self.url, data=data)
+        self.assertEqual(response.status_code, 404)
 
 # OrderListView
 # Returns all orders of correct user
