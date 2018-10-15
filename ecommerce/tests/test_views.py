@@ -1,13 +1,22 @@
 import pytest
-from django.test import TestCase
+from django.db import IntegrityError
+from django.test import TestCase, RequestFactory
 from django.urls import reverse
 
 from ecommerce.models import Product, ProductCategory, Cart, Order, OrderList, Image
-from ecommerce.views import get_total_price_of_cart
-
-
-# Test ProductListView
+from ecommerce.views import get_total_price_of_cart, CheckoutPageView
 from registration.models import User
+
+
+def setup_view(view, request, *args, **kwargs):
+    """Mimic ``as_view()``, but returns view instance.
+    Use this function to get view instances on which you can run unit tests,
+    by testing specific methods."""
+
+    view.request = request
+    view.args = args
+    view.kwargs = kwargs
+    return view
 
 
 class TestProductListView(TestCase):
@@ -472,3 +481,39 @@ class TestCheckoutPageView(EcommerceTestCase):
 
         response = self.client.post(self.url, follow=True)
         self.assertEqual(response.context['order'], Order.objects.get(user=self.user))
+
+    def test_place_order_from_cart_method_raises_integrity_error_on_None_arguments(self):
+        factory = RequestFactory()
+        request = factory.get(self.url)
+
+        view = setup_view(CheckoutPageView(), request)
+        with self.assertRaises(IntegrityError):
+            view.place_order_from_cart(cart_list=None, total_amount=None)
+
+    def test_place_order_from_cart_method_raises_integrity_error_on_0_total(self):
+        factory = RequestFactory()
+        request = factory.get(self.url)
+
+        view = setup_view(CheckoutPageView(), request)
+        with self.assertRaises(IntegrityError):
+            view.place_order_from_cart(cart_list=None, total_amount=-1)
+
+        with self.assertRaises(IntegrityError):
+            view.place_order_from_cart(cart_list=None, total_amount=0)
+
+    def test_card_list_amount_not_available_raises_integrity_error(self):
+        factory = RequestFactory()
+        request = factory.get(self.url)
+
+        self.login()
+        request.user = self.user
+
+        self.create_cart_items()
+        cart_list = Cart.objects.filter(user=self.user)
+        self.p1.quantity = 1
+        self.p1.save()
+
+        view = setup_view(CheckoutPageView(), request)
+        with self.assertRaises(IntegrityError):
+            view.place_order_from_cart(
+                cart_list=cart_list, total_amount=get_total_price_of_cart(cart_list))

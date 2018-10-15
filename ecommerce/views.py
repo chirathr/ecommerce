@@ -152,7 +152,7 @@ class CheckoutPageView(LoginRequiredMixin, TemplateView):
         return render(request, self.template_name, context)
 
     def place_order_from_cart(self, cart_list, total_amount):
-        if total_amount <= 0 or cart_list is None:
+        if total_amount is None or total_amount <= 0 or cart_list is None:
             raise IntegrityError
         order = Order.objects.create(user=self.request.user, amount=total_amount)
 
