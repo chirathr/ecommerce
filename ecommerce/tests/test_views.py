@@ -90,10 +90,57 @@ def test_get_total_price_of_cart_with_empty_cart():
     user = User.objects.create(username="User", password="12345")
     assert 0 == get_total_price_of_cart(Cart.objects.filter(user=user))
 
-# Check for correct template
-# Check login required
-# context['cart_list'] loads correct cart
-# context['total'] shows the correct total
+
+# Test CardListView
+class TestCartListView(TestCase):
+    def setUp(self):
+        self.url = reverse('cart')
+        self.credentials = {
+            'username': 'testuser',
+            'password': 'secret@123'}
+        self.user = User.objects.create_user(**self.credentials)
+
+    def login(self):
+        self.client.login(**self.credentials)
+
+    def create_cart_items(self):
+        p1 = Product.objects.create(
+            name="Product A", price=100.0, discount_percent=15, quantity=3, rating=4)
+        p2 = Product.objects.create(
+            name="Product B", price=230.0, discount_percent=10, quantity=4, rating=4)
+
+        Cart.objects.create(user=self.user, product=p1, quantity=2)
+        Cart.objects.create(user=self.user, product=p2, quantity=1)
+
+    def test_redirects_to_login_if_not_logged_in(self):
+        response = self.client.get(self.url, follow=True)
+        self.assertTemplateUsed(response, template_name='account/login.html.haml')
+
+    def test_template_is_cart(self):
+        """
+        Check for correct template
+        """
+        self.login()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, template_name='ecommerce/cart.html.haml')
+
+    def test_correct_cart_list_in_context(self):
+        self.login()
+        self.create_cart_items()
+
+        response = self.client.get(self.url)
+        self.assertEqual(
+            list(response.context['cart_list']), list(Cart.objects.filter(user=self.user)))
+
+    def test_correct_total_in_context(self):
+        self.login()
+        self.create_cart_items()
+
+        response = self.client.get(self.url)
+        expected_total = get_total_price_of_cart(Cart.objects.filter(user=self.user))
+        self.assertEqual(expected_total, response.context['total'])
+
 
 # Test CartAddView
 # check get request returns home template
