@@ -174,20 +174,18 @@ class CheckoutPageView(LoginRequiredMixin, TemplateView):
 
         total_amount = get_total_price_of_cart(cart_list)
 
-        # Check if wallet balance is there to place the order
-        if self.request.user.wallet_balance < total_amount:
-            return redirect('checkout')
-
         # Atomic transaction for placing order
+        enough_balance = False
         try:
             with transaction.atomic():
-                if not self.request.user.reduce_user_wallet_balance(total_amount):
+                enough_balance = self.request.user.reduce_user_wallet_balance(total_amount)
+                if not enough_balance:
                     raise IntegrityError
                 order = self.place_order_from_cart(cart_list, total_amount)
         except IntegrityError:
+            if not enough_balance:
+                return redirect('checkout')
             return redirect('checkout_failed')
-
-        print("Sucess")
 
         template_name = "ecommerce/order_successful.html.haml"
         context = {'order': order}

@@ -490,7 +490,7 @@ class TestCheckoutPageView(EcommerceTestCase):
         with self.assertRaises(IntegrityError):
             view.place_order_from_cart(cart_list=None, total_amount=None)
 
-    def test_place_order_from_cart_method_raises_integrity_error_on_0_total(self):
+    def test_place_order_from_cart_method_raises_integrity_error_on_0_total_amount(self):
         factory = RequestFactory()
         request = factory.get(self.url)
 
@@ -501,7 +501,7 @@ class TestCheckoutPageView(EcommerceTestCase):
         with self.assertRaises(IntegrityError):
             view.place_order_from_cart(cart_list=None, total_amount=0)
 
-    def test_card_list_amount_not_available_raises_integrity_error(self):
+    def test_not_enough_product_quantity_raises_integrity_error(self):
         factory = RequestFactory()
         request = factory.get(self.url)
 
@@ -517,3 +517,23 @@ class TestCheckoutPageView(EcommerceTestCase):
         with self.assertRaises(IntegrityError):
             view.place_order_from_cart(
                 cart_list=cart_list, total_amount=get_total_price_of_cart(cart_list))
+
+    def test_not_enough_balance_fails_the_checkout_process(self):
+        self.login()
+        self.create_cart_items()
+
+        self.user.wallet_balance = 0
+        self.user.save()
+
+        response = self.client.post(self.url, follow=True)
+        self.assertTemplateUsed(response, 'ecommerce/checkout.html.haml')
+
+    def test_not_enough_product_quantity_fails_the_checkout_process(self):
+        self.login()
+        self.create_cart_items()
+
+        self.p1.quantity = 0
+        self.p1.save()
+
+        response = self.client.post(self.url, follow=True)
+        self.assertTemplateUsed(response, 'ecommerce/checkout_failed.html.haml')
